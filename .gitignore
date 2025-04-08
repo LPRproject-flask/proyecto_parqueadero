@@ -28,7 +28,7 @@ static/uploads/
 # Modelos pesados (puedes incluir tu carpeta de YOLO si es muy grande)
 trocr_model/
 runs/
-yolov3.weights
+#yolov3.weights
 best.pt
 
 # Archivos de entrenamiento YOLO
