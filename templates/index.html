@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex justify-center items-center min-h-screen bg-gray-100">
+    <div class="w-full max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden flex">
+        
+        <!-- Sección de bienvenida -->
+        <div class="w-1/2 bg-teal-500 text-white p-10 flex flex-col justify-center items-center">
+            <h1 class="text-3xl font-bold">¡Hola!</h1>
+            <p class="mt-2 text-center">¿Aún no tiene una cuenta? Regístrese con sus datos para usar las funciones del sitio. 😎</p>
+            <a href="{{ url_for('register_user') }}" class="mt-4 px-6 py-2 bg-white text-teal-500 font-semibold rounded-lg shadow-md hover:bg-gray-200 transition">
+                Registrarse ahora
+            </a>
+        </div>
+
+        <!-- Formulario de inicio de sesión -->
+        <div class="w-1/2 p-10">
+            <h2 class="text-2xl font-bold text-gray-700 text-center">Iniciar sesión</h2>
+            <div class="flex justify-center my-4">
+                <img src="{{ url_for('static', filename='imagenes/logoudec.png') }}" alt="Logo Universidad" class="w-48">
+            </div>
+            <p class="text-center text-gray-500">Ingrese sus datos para iniciar sesión. 🧐</p>
+
+            <form id="loginForm" action="/login" method="POST" class="mt-4">
+                <input class="w-full px-4 py-2 border rounded-lg my-2 focus:ring-2 focus:ring-teal-500" type="text" id="username" name="username" placeholder="Usuario" required>
+                <input class="w-full px-4 py-2 border rounded-lg my-2 focus:ring-2 focus:ring-teal-500" type="password" id="password" name="password" placeholder="Contraseña" required>
+                <button class="w-full bg-teal-500 text-white py-2 rounded-lg font-semibold hover:bg-teal-600 transition">
+                    INICIAR SESIÓN
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('forgot_password') }}" class="text-teal-500 hover:underline">¿Olvidaste tu contraseña? 🤔</a>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

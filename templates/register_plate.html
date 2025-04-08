@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Registro de Placa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex bg-gray-100 min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md flex flex-col items-center py-6">
+        <img src="{{ url_for('static', filename='imagenes/logoudec.png') }}" alt="Logo Universidad" class="w-48">
+        <h1 class="text-xl font-bold text-blue-600 text-center mb-6">Registra tu placa. 😉</h1>
+        <nav class="space-y-4 text-center w-full">
+            <a href="{{ url_for('dashboard') }}" class="mt-4 px-6 py-2 bg-white text-teal-500 font-semibold rounded-lg shadow-md hover:bg-gray-200 transition">🏠 Inicio</a>
+            <a href="#" class="block py-2 text-blue-600 font-semibold bg-blue-100 rounded">📝 Registrar Placa</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Registrar Placa 🚘</h2>
+            
+            <form id="registerForm" class="space-y-4" enctype="multipart/form-data">
+                <input type="text" id="ownerName" placeholder="Nombre del Propietario" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg">
+                <input type="text" id="plateNumber" placeholder="Número de Placa" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg">
+                <input type="text" id="ownerID" placeholder="Cédula" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg">
+                <label class="block text-left text-gray-600">Foto del Vehículo:</label>
+                <input type="file" id="vehiclePhoto" accept="image/*" required 
+                       class="w-full p-2 border border-gray-300 rounded-lg">
+                <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700">
+                    Registrar
+                </button>
+            </form>
+            <button onclick="window.location.href='dashboard'" 
+                    class="w-full mt-4 bg-gray-500 text-white p-3 rounded-lg font-bold hover:bg-gray-600">
+                Volver
+            </button>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let formData = new FormData();
+            formData.append("owner_name", document.getElementById("ownerName").value);
+            formData.append("plate_number", document.getElementById("plateNumber").value);
+            formData.append("owner_id", document.getElementById("ownerID").value);
+            formData.append("vehicle_photo", document.getElementById("vehiclePhoto").files[0]);
+
+            fetch("/register_plate", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Placa registrada con éxito");
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert("Error al registrar la placa");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Hubo un problema con la solicitud");
+            });
+        });
+    </script>
+</body>
+</html>

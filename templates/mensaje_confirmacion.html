@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrucciones Enviadas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex justify-center items-center min-h-screen bg-gray-100">
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+        <h2 class="text-2xl font-bold text-teal-600 mb-2">¡Revisa tu correo! 📬</h2>
+        <p class="text-gray-600 mb-4">
+            Si el correo está registrado, recibirás un enlace para restablecer tu contraseña. Este enlace es válido por 10 minutos. 🔐
+        </p>
+        <a href="{{ url_for('login_page') }}" class="text-teal-500 hover:underline">Volver al inicio de sesión</a>
+    </div>
+</body>
+</html>

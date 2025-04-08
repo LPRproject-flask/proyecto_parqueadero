@@ -1,0 +1,6 @@
+path: C:\\Users\\kmilo\\Desktop\\proyecto_parqueadero\\dataset
+train: images/train
+val: images/val
+
+nc: 3  # Número de clases (según tu dataset)
+names: ["registrations", "letters", "numbers"]
