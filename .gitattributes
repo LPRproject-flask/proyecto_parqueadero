@@ -1,1 +1,8 @@
-yolov3.weights filter=lfs diff=lfs merge=lfs -text
+# Track pesos de modelos y archivos grandes
+*.weights filter=lfs diff=lfs merge=lfs -text
+*.pt filter=lfs diff=lfs merge=lfs -text
+*.h5 filter=lfs diff=lfs merge=lfs -text
+# Track imágenes grandes si las usas
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
