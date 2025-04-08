@@ -5,3 +5,4 @@ numpy
 gunicorn
 bcrypt
 ultralytics
+transformers
