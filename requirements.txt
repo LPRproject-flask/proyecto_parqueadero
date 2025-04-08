@@ -1,9 +1,12 @@
-opencv-python
-opencv-python-headless
 flask
-numpy
+flask_sqlalchemy
+flask_mail
 gunicorn
 bcrypt
+opencv-python
+opencv-python-headless
+numpy
 ultralytics
+torch
 transformers
-flask_sqlalchemy
+itsdangerous
