@@ -64,7 +64,8 @@ class TextExtraction:
 class PlateRecognition:
     def __init__(self):
         print("📌 Cargando modelo YOLO...")
-        self.model = YOLO("C:\\Users\\kmilo\\Desktop\\proyecto_parqueadero\\runs\\detect\\train\\weights\\best.pt")
+        ##self.model = YOLO("C:\\Users\\kmilo\\Desktop\\proyecto_parqueadero\\runs\\detect\\train\\weights\\best.pt")
+        self.model = YOLO("model_weights/best.pt")
         self.text_extraction = TextExtraction()
         print("✅ Modelo YOLO cargado correctamente.")
 
