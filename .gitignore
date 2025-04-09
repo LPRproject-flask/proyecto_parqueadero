@@ -26,10 +26,10 @@ Thumbs.db
 static/uploads/
 
 # Modelos pesados (puedes incluir tu carpeta de YOLO si es muy grande)
-trocr_model/
+#trocr_model/
 runs/
 #yolov3.weights
-best.pt
+#best.pt
 
 # Archivos de entrenamiento YOLO
 dataset/

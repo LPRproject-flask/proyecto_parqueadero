@@ -42,8 +42,11 @@ local_model_path = "trocr_model"
 # Clase para extracción de texto con TrOCR
 class TextExtraction:
     def __init__(self):
-        self.processor = TrOCRProcessor.from_pretrained(local_model_path)
-        self.model = VisionEncoderDecoderModel.from_pretrained(local_model_path)
+        model_name = "microsoft/trocr-base-stage1"
+        self.processor = TrOCRProcessor.from_pretrained(model_name)
+        self.model = VisionEncoderDecoderModel.from_pretrained(model_name)
+        #self.processor = TrOCRProcessor.from_pretrained(local_model_path)
+        #self.model = VisionEncoderDecoderModel.from_pretrained(local_model_path)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model.to(self.device)
 
