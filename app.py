@@ -36,7 +36,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)  # 🔥 conectar db con la app.py
 
 # Ruta del modelo TrOCR
-local_model_path = "C:\\Users\\kmilo\\Desktop\\proyecto_parqueadero\\trocr_model"
+##local_model_path = "C:\\Users\\kmilo\\Desktop\\proyecto_parqueadero\\trocr_model"
+local_model_path = "trocr_model"
 
 # Clase para extracción de texto con TrOCR
 class TextExtraction:
