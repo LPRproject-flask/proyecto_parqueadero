@@ -16,6 +16,9 @@ from flask_sqlalchemy import SQLAlchemy
 from models import db, Plate  
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
+import base64
+import io
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -126,7 +129,7 @@ def generate_frames():
 # Ruta para la transmisión del video
 @app.route('/video_feed')
 def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(plate_recognition.process_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Conectar a la base de datos
 def get_db():
@@ -335,6 +338,32 @@ def reset_password(token):
         return redirect(url_for('login_page'))
 
     return render_template('nueva_contrasena.html') 
+
+#al dar al boton capturar placa se envia la imagen y la procesa 
+@app.route('/process_plate', methods=['POST'])
+def process_plate():
+    data = request.get_json()
+    if not data or 'image' not in data:
+        return jsonify({'error': 'No se proporcionó ninguna imagen'}), 400
+
+    image_data = data['image'].split(",")[1]
+    image_bytes = base64.b64decode(image_data)
+
+    image_pil = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    image_np = np.array(image_pil)
+    image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+
+    plates = plate_recognition.detect_plate(image_bgr)
+
+    if not plates:
+        return jsonify({'plate_text': 'No detectada'})
+
+    # Suponemos que solo interesa la primera placa detectada
+    x1, y1, x2, y2 = plates[0]
+    plate_crop = image_bgr[y1:y2, x1:x2]
+    plate_text = plate_recognition.text_extraction.extract_text(plate_crop)
+
+    return jsonify({'plate_text': plate_text})
 
 # Ejecutar la app
 if __name__ == '__main__':
