@@ -129,7 +129,7 @@ def generate_frames():
 # Ruta para la transmisión del video
 @app.route('/video_feed')
 def video_feed():
-    return Response(plate_recognition.process_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Conectar a la base de datos
 def get_db():
