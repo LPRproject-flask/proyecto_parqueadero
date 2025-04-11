@@ -211,25 +211,25 @@ if not os.path.exists(UPLOAD_FOLDER):
 @app.route('/register_plate', methods=['POST'])
 def register_plate():
     try:
-        owner_name = request.form.get('owner_name')
-        plate_number = request.form.get('plate_number')
-        owner_id = request.form.get('owner_id')
-        vehicle_photo = request.files.get('vehicle_photo')
+        nombre = request.form.get('nombre')
+        placa = request.form.get('placa')
+        cedula = request.form.get('cedula')
+        foto = request.files.get('foto')
 
-        if not owner_name or not plate_number or not owner_id or not vehicle_photo:
+        if not nombre or not placa or not cedula or not foto:
             return jsonify({"success": False, "error": "Todos los campos son obligatorios"}), 400
         
         # Guardar la imagen en la carpeta de uploads
-        image_path = os.path.join(app.config['UPLOAD_FOLDER'], vehicle_photo.filename)
-        vehicle_photo.save(image_path)
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], foto.filename)
+        foto.save(image_path)
 
         # Guardar en la base de datos
         conn = sqlite3.connect('db/data.db')
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO plates (owner_name, plate_number, owner_id, vehicle_photo)
+            INSERT INTO plates (nombre, placa, cedula, foto)
             VALUES (?, ?, ?, ?)
-        """, (owner_name, plate_number, owner_id, vehicle_photo.filename))
+        """, (nombre, placa, cedula, foto.filename))
         conn.commit()
         conn.close()
 
