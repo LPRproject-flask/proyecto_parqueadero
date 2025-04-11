@@ -49,10 +49,10 @@
             event.preventDefault();
 
             let formData = new FormData();
-            formData.append("owner_name", document.getElementById("ownerName").value);
-            formData.append("plate_number", document.getElementById("plateNumber").value);
-            formData.append("owner_id", document.getElementById("ownerID").value);
-            formData.append("vehicle_photo", document.getElementById("vehiclePhoto").files[0]);
+            formData.append("nombre", document.getElementById("ownerName").value);
+            formData.append("placa", document.getElementById("plateNumber").value);
+            formData.append("cedula", document.getElementById("ownerID").value);
+            formData.append("foto", document.getElementById("vehiclePhoto").files[0]);
 
             fetch("/register_plate", {
                 method: "POST",
