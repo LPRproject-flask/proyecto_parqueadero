@@ -29,7 +29,8 @@
     <!-- Cámara -->
     <div id="camera_container" class="hidden">
       <h3 class="text-xl font-semibold mb-3">📷 Detección en Vivo</h3>
-      <video id="video" class="w-full max-w-2xl rounded-lg shadow-md mb-4" autoplay></video>
+      <img id="video" src="/video_feed" class="w-full max-w-2xl rounded-lg shadow-md mb-4" />
+      <!-- <video id="video" class="w-full max-w-2xl rounded-lg shadow-md mb-4" autoplay></video> -->
       <button id="capturePlate" class="bg-indigo-500 text-white px-6 py-2 rounded hover:bg-indigo-600 transition">Capturar Placa</button>
     </div>
 
@@ -51,49 +52,33 @@
     <div id="plateInfoCard" class="hidden mt-10 max-w-2xl bg-white p-6 rounded-lg shadow-lg border">
       <div class="flex flex-col items-center text-center">
         <img src="{{ url_for('static', filename='imagenes/logoudec.png') }}" alt="Logo Universidad" class="w-60 mb-4" />
-        <p class="text-lg text-gray-800">PROPIETARIO DEL VEHÍCULO 🚘: <span id="vehiculoNombre"></span></p>
-        <p class="text-lg text-gray-800">PLACA DEL VEHÍCULO 🗃️: <span id="vehiculoPlaca"></span></p>
-        <p class="text-lg text-gray-800">IDENTIFICACIÓN 🕵️: <span id="vehiculoCedula"></span></p>
-        <img id="vehiculoFoto" class="w-60 rounded-lg shadow-md mb-4" src="" alt="Foto del Vehículo" />
-        <p class="text-lg text-gray-800">CORREO 📧:<span id="ownerEmail"></span></p>
-        <p class="text-xl font-bold text-green-600">¡BIENVENIDO 😄 <span id="bienvenidaNombre"></span>!</p>
+        <p class="text-lg text-gray-800">PROPIETARIO DEL VEHÍCULO 🚘: <span id="nombre"></span></p>
+        <p class="text-lg text-gray-800">PLACA DEL VEHÍCULO 🗃️: <span id="placa"></span></p>
+        <p class="text-lg text-gray-800">IDENTIFICACIÓN 🕵️: <span id="cedula"></span></p>
+        <img id="foto" class="w-60 rounded-lg shadow-md mb-4" src="" alt="Foto del Vehículo" />
+        <p class="text-lg text-gray-800">CORREO 📧:<span id="correo"></span></p>
+        <p class="text-xl font-bold text-green-600">¡BIENVENIDO 😄 <span id="bienvenida"></span>!</p>
       </div>
     </div>
   </main>
 
   <script>
-    let videoStream = null;
-
     document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("openCamera").addEventListener("click", function () {
         document.getElementById("camera_container").classList.remove("hidden");
         document.getElementById("closeCamera").classList.remove("hidden");
         document.getElementById("openCamera").classList.add("hidden");
-
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            videoStream = stream;
-            document.getElementById("video").srcObject = stream;
-          })
-          .catch(() => alert("Error al acceder a la cámara"));
       });
-
-      document.getElementById("closeCamera").addEventListener("click", closeCamera);
-
+  
+      document.getElementById("closeCamera").addEventListener("click", function () {
+        document.getElementById("camera_container").classList.add("hidden");
+        document.getElementById("closeCamera").classList.add("hidden");
+        document.getElementById("openCamera").classList.remove("hidden");
+      });
+  
       document.getElementById("capturePlate").addEventListener("click", function () {
-        const video = document.getElementById("video");
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL("image/png");
-
-        fetch("/process_plate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: imageData })
+        fetch("/capture_image", {
+          method: "POST"
         })
         .then(response => response.json())
         .then(data => {
@@ -105,11 +90,11 @@
           console.error("Error al procesar la placa:", error);
         });
       });
-
+  
       document.getElementById("checkDatabase").addEventListener("click", function () {
         const plate = document.getElementById("plateNumber").value.trim();
         if (!plate) return;
-
+  
         fetch("/check_plate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -118,17 +103,13 @@
         .then(response => response.json())
         .then(data => {
           if (data.registered) {
-
-            document.getElementById("vehiculoNombre").textContent = data.owner_name;
-            document.getElementById("vehiculoPlaca").textContent = data.plate_number;
-            document.getElementById("vehiculoCedula").textContent = data.owner_id;
-            document.getElementById("vehiculoFoto").src = `/static/uploads/${data.photo}`;
-            document.getElementById("ownerEmail").textContent = data.email;
-            document.getElementById("bienvenidaNombre").textContent = data.owner_name;
-
+            document.getElementById("nombre").textContent = data.nombre;
+            document.getElementById("placa").textContent = data.placa;
+            document.getElementById("cedula").textContent = data.cedula;
+            document.getElementById("foto").src = `/static/uploads/${data.foto}`;
+            document.getElementById("correo").textContent = data.email;
+            document.getElementById("bienvenida").textContent = data.nombre;
             document.getElementById("plateInfoCard").classList.remove("hidden");
-
-
           } else {
             alert("❌ Placa no encontrada en la base de datos.");
             document.getElementById("plateInfoCard").classList.add("hidden");
@@ -138,15 +119,15 @@
           console.error("Error al verificar la placa:", error);
         });
       });
-
+  
       document.getElementById("verifyManualPlate").addEventListener("click", function () {
         const plate = document.getElementById("manualPlateInput").value.trim();
-
+  
         if (!plate) {
           document.getElementById("manualCheckResult").textContent = "⚠️ Por favor ingrese una placa.";
           return;
         }
-
+  
         fetch("/check_plate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -155,8 +136,16 @@
         .then(response => response.json())
         .then(data => {
           if (data.registered) {
-
+            
             document.getElementById("manualCheckResult").textContent = "✅ Placa registrada: " + data.owner_name;
+
+            document.getElementById("nombre").textContent = data.nombre;
+            document.getElementById("placa").textContent = data.placa;
+            document.getElementById("cedula").textContent = data.cedula;
+            document.getElementById("foto").src = `/static/uploads/${data.foto}`;
+            document.getElementById("correo").textContent = data.email;
+            document.getElementById("bienvenida").textContent = data.nombre;
+
             document.getElementById("plateInfoCard").classList.remove("hidden");
           } else {
             document.getElementById("manualCheckResult").textContent = "❌ Placa no encontrada en la base de datos.";
@@ -168,16 +157,6 @@
         });
       });
     });
-
-    function closeCamera() {
-      if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        document.getElementById("video").srcObject = null;
-      }
-      document.getElementById("camera_container").classList.add("hidden");
-      document.getElementById("closeCamera").classList.add("hidden");
-      document.getElementById("openCamera").classList.remove("hidden");
-    }
   </script>
 </body>
 </html>
