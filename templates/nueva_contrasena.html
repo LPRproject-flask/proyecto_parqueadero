@@ -1,20 +1,109 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Establecer Nueva Contraseña</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Establecer Nueva Contraseña</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="flex justify-center items-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
-        <h2 class="text-2xl font-bold text-gray-700 text-center mb-4">Nueva Contraseña 🔑</h2>
-        <form method="POST">
-            <input class="w-full px-4 py-2 border rounded-lg my-2" type="password" name="password" placeholder="Nueva contraseña" required>
-            <button class="w-full bg-teal-500 text-white py-2 rounded-lg font-semibold hover:bg-teal-600 transition" type="submit">
-                Guardar Contraseña
-            </button>
-        </form>
-    </div>
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-r from-cyan-100 via-white to-cyan-100">
+
+  <div class="w-full max-w-md bg-white shadow-xl rounded-xl p-8 space-y-4">
+    <h2 class="text-2xl font-bold text-center text-gray-700">Establecer Nueva Contraseña 🔐</h2>
+    <p class="text-center text-gray-500 text-sm mb-4">Ingrese su nueva contraseña y confírmela.</p>
+
+    <form method="POST" onsubmit="return validatePasswords()" class="space-y-4">
+
+      <!-- Nueva contraseña -->
+      <div class="relative">
+        <input type="password" name="password" id="password" placeholder="Nueva contraseña" required
+               class="w-full px-4 py-2 pr-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <button type="button" onclick="togglePassword('password', 'eye1')" 
+                class="absolute right-3 top-2.5 text-gray-500 hover:text-teal-600 transition" 
+                title="Mostrar contraseña">
+          <svg id="eye1" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5
+                    c4.477 0 8.268 2.943 9.542 7
+                    -1.274 4.057-5.065 7-9.542 7
+                    -4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Confirmar contraseña -->
+      <div class="relative">
+        <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirmar contraseña" required
+               class="w-full px-4 py-2 pr-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <button type="button" onclick="togglePassword('confirm_password', 'eye2')" 
+                class="absolute right-3 top-2.5 text-gray-500 hover:text-teal-600 transition" 
+                title="Mostrar contraseña">
+          <svg id="eye2" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5
+                    c4.477 0 8.268 2.943 9.542 7
+                    -1.274 4.057-5.065 7-9.542 7
+                    -4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+      </div>
+
+      <p id="errorMsg" class="text-red-500 text-sm text-center hidden">❌ Las contraseñas no coinciden.</p>
+
+      <button 
+        type="submit" 
+        class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl transition duration-300">
+        Guardar Contraseña
+      </button>
+    </form>
+  </div>
+
+  <script>
+    function togglePassword(fieldId, iconId) {
+      const input = document.getElementById(fieldId);
+      const icon = document.getElementById(iconId);
+
+      if (input.type === "password") {
+        input.type = "text";
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19
+                  c-4.477 0-8.268-2.943-9.542-7
+                  a10.05 10.05 0 012.442-4.362m2.1-1.78A9.965 9.965 0 0112 5
+                  c4.477 0 8.268 2.943 9.542 7
+                  a9.96 9.96 0 01-4.51 5.569M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 3l18 18" />`;
+      } else {
+        input.type = "password";
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5
+                  c4.477 0 8.268 2.943 9.542 7
+                  -1.274 4.057-5.065 7-9.542 7
+                  -4.477 0-8.268-2.943-9.542-7z" />`;
+      }
+    }
+
+    function validatePasswords() {
+      const password = document.getElementById("password").value;
+      const confirm = document.getElementById("confirm_password").value;
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (password !== confirm) {
+        errorMsg.classList.remove("hidden");
+        return false; // Previene el envío
+      }
+      errorMsg.classList.add("hidden");
+      return true;
+    }
+  </script>
+
 </body>
 </html>
