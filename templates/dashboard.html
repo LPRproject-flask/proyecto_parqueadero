@@ -54,118 +54,107 @@
         <img src="{{ url_for('static', filename='imagenes/logoudec.png') }}" alt="Logo Universidad" class="w-60 mb-4" />
         <p class="text-lg text-gray-800">PROPIETARIO DEL VEHÍCULO 🚘: <span id="nombre"></span></p>
         <p class="text-lg text-gray-800">PLACA DEL VEHÍCULO 🗃️: <span id="placa"></span></p>
-        <p class="text-lg text-gray-800">IDENTIFICACIÓN 🕵️: <span id="cedula"></span></p>
+        <p class="text-lg text-gray-800">IDENTIFICACIÓN 🕵️:<span id="cedula"></span></p>
         <img id="foto" class="w-60 rounded-lg shadow-md mb-4" src="" alt="Foto del Vehículo" />
         <p class="text-lg text-gray-800">CORREO 📧:<span id="correo"></span></p>
-        <p class="text-xl font-bold text-green-600">¡BIENVENIDO 😄 <span id="bienvenida"></span>!</p>
+        <p class="text-xl font-bold text-green-600">¡BIENVENIDO 😄<span id="bienvenida"></span>!</p>
       </div>
     </div>
   </main>
 
   <script>
-    let videoStream = null;
-
-    document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById("openCamera").addEventListener("click", function () {
-        document.getElementById("camera_container").classList.remove("hidden");
-        document.getElementById("closeCamera").classList.remove("hidden");
-        document.getElementById("openCamera").classList.add("hidden");
-
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            videoStream = stream;
-            document.getElementById("video").srcObject = stream;
-          })
-          .catch(() => alert("Error al acceder a la cámara"));
-      });
-
-      document.getElementById("closeCamera").addEventListener("click", closeCamera);
-
-      document.getElementById("capturePlate").addEventListener("click", function () {
-        const video = document.getElementById("video");
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL("image/png");
-
-        fetch("/process_plate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: imageData })
-        })
-        .then(response => response.json())
-        .then(data => {
-          const plateText = data.plate_text;
-          document.getElementById("plateNumber").value = plateText;
-          document.getElementById("plateValidation").classList.remove("hidden");
-        })
-        .catch(error => {
-          console.error("Error al procesar la placa:", error);
-        });
-      });
-
-      document.getElementById("checkDatabase").addEventListener("click", function () {
-        const plate = document.getElementById("plateNumber").value.trim();
-        if (!plate) return;
-
-        fetch("/check_plate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plate: plate })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.registered) {
-            alert("✅ Placa registrada: " + data.owner);
-          } else {
-            alert("❌ Placa no encontrada en la base de datos.");
-          }
-        })
-        .catch(error => {
-          console.error("Error al verificar la placa:", error);
-        });
-      });
-
-      document.getElementById("verifyManualPlate").addEventListener("click", function () {
-        const plate = document.getElementById("manualPlateInput").value.trim();
-
-        if (!plate) {
-          document.getElementById("manualCheckResult").textContent = "⚠️ Por favor ingrese una placa.";
-          return;
-        }
-
-        fetch("/check_plate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plate: plate })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.registered) {
-            document.getElementById("manualCheckResult").textContent = "✅ Placa registrada: " + data.owner;
-          } else {
-            document.getElementById("manualCheckResult").textContent = "❌ Placa no encontrada en la base de datos.";
-          }
-        })
-        .catch(error => {
-          console.error("Error al verificar la placa:", error);
-          document.getElementById("manualCheckResult").textContent = "❌ Error al verificar la placa.";
-        });
-      });
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("openCamera").addEventListener("click", function () {
+      document.getElementById("camera_container").classList.remove("hidden");
+      document.getElementById("closeCamera").classList.remove("hidden");
+      document.getElementById("openCamera").classList.add("hidden");
     });
 
-    function closeCamera() {
-      if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        document.getElementById("video").srcObject = null;
-      }
+    document.getElementById("closeCamera").addEventListener("click", function () {
       document.getElementById("camera_container").classList.add("hidden");
       document.getElementById("closeCamera").classList.add("hidden");
       document.getElementById("openCamera").classList.remove("hidden");
-    }
-  </script>
+    });
+
+    document.getElementById("capturePlate").addEventListener("click", function () {
+      fetch("/capture_image", {
+        method: "POST"
+      })
+      .then(response => response.json())
+      .then(data => {
+        const plateText = data.plate_text;
+        document.getElementById("plateNumber").value = plateText;
+        document.getElementById("plateValidation").classList.remove("hidden");
+      })
+      .catch(error => {
+        console.error("Error al procesar la placa:", error);
+      });
+    });
+
+    document.getElementById("checkDatabase").addEventListener("click", function () {
+      const plate = document.getElementById("plateNumber").value.trim();
+      if (!plate) return;
+
+      fetch("/check_plate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plates: plate })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.registered) {
+
+          document.getElementById("nombre").textContent = data.owner_name;
+          document.getElementById("placa").textContent = data.plate_number;
+          document.getElementById("cedula").textContent = data.owner_id;
+          document.getElementById("foto").src = `/static/uploads/${data.photo}`;
+          document.getElementById("email").textContent = data.email;
+          document.getElementById("bienvenida").textContent = data.owner_name;
+
+          document.getElementById("plateInfoCard").classList.remove("hidden");
+
+        } else {
+          alert("❌ Placa no encontrada en la base de datos.");
+          document.getElementById("plateInfoCard").classList.add("hidden");
+        }
+      })
+      .catch(error => {
+        console.error("Error al verificar la placa:", error);
+      });
+    });
+
+    document.getElementById("verifyManualPlate").addEventListener("click", function () {
+      const plate = document.getElementById("manualPlateInput").value.trim();
+
+      if (!plate) {
+        document.getElementById("manualCheckResult").textContent = "⚠️ Por favor ingrese una placa.";
+        return;
+      }
+
+      fetch("/check_plate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plates: plate })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.registered) {
+          document.getElementById("manualCheckResult").textContent = "✅ Placa registrada: " + data.owner_name;
+
+          document.getElementById("nombre").textContent = data.owner_name;
+          document.getElementById("placa").textContent = data.plate_number;
+
+          document.getElementById("plateInfoCard").classList.remove("hidden");
+        } else {
+          document.getElementById("manualCheckResult").textContent = "❌ Placa no encontrada en la base de datos.";
+        }
+      })
+      .catch(error => {
+        console.error("Error al verificar la placa:", error);
+        document.getElementById("manualCheckResult").textContent = "❌ Error al verificar la placa.";
+      });
+    });
+  });
+</script>
 </body>
 </html>
