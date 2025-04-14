@@ -30,7 +30,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'poryectolpr@gmail.com'
-app.config['MAIL_PASSWORD'] = 'jaau enfj rnij fhrj'  # NO tu contraseña normal
+app.config['MAIL_PASSWORD'] = 'jaau enfj rnij fhrj' 
 mail = Mail(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
