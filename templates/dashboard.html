@@ -143,7 +143,9 @@
 
           document.getElementById("nombre").textContent = data.owner_name;
           document.getElementById("placa").textContent = data.plate_number;
-
+          document.getElementById("cedula").textContent = data.owner_id;
+          document.getElementById("foto").src = `/static/uploads/${data.photo}`;
+          
           document.getElementById("plateInfoCard").classList.remove("hidden");
         } else {
           document.getElementById("manualCheckResult").textContent = "❌ Placa no encontrada en la base de datos.";
