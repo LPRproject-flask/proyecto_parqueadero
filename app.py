@@ -19,6 +19,7 @@ from itsdangerous import URLSafeTimedSerializer
 import base64
 import io
 from PIL import Image
+import sys
 
 app = Flask(__name__)
 
@@ -72,8 +73,14 @@ class PlateRecognition:
     def __init__(self):
         print("📌 Cargando modelo YOLO...")
         ##self.model = YOLO("C:\\Users\\kmilo\\Desktop\\proyecto_parqueadero\\runs\\detect\\train\\weights\\best.pt")
-        self.model = YOLO("model_weights/best.pt")
+
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        model_path = os.path.join(base_path, 'model_weights', 'best.pt')
+        self.model = YOLO(model_path)
+
         self.text_extraction = TextExtraction()
+        
+
         print("✅ Modelo YOLO cargado correctamente.")
 
     def detect_plate(self, image):

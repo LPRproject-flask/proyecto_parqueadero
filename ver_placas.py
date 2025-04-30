@@ -6,7 +6,7 @@ def ver_placas():
     cursor = conn.cursor()
     
     # Consulta para obtener las placas registradas
-    cursor.execute("SELECT id, owner_name, plate_number, owner_id, email FROM plates")
+    cursor.execute("SELECT id, nombre, placa, cedula, foto, email FROM plates")
     placas = cursor.fetchall()  # Obtener todos los resultados
     
     # Cerrar la conexión
