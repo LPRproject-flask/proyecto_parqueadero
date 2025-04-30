@@ -34,7 +34,21 @@ app.config['MAIL_USERNAME'] = 'poryectolpr@gmail.com'
 app.config['MAIL_PASSWORD'] = 'jaau enfj rnij fhrj' 
 mail = Mail(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+##app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+
+if os.environ.get('RENDER'):
+  
+  db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data.db')
+
+else:
+
+  base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+  instance_path = os.path.join(os.path.expanduser("~"), "AppData", "Local", "ReconocimientoPlacas")
+  if not os.path.exists(instance_path):
+      os.makedirs(instance_path)
+  db_path = os.path.join(instance_path, 'data.db') 
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(instance_path, 'data.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)  # 🔥 conectar db con la app.py
