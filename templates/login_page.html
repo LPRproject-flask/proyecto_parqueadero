@@ -8,6 +8,15 @@
 </head>
 
 <body class="min-h-screen flex items-center justify-center bg-gradient-to-r from-cyan-100 via-white to-cyan-100">
+
+  <!-- Loader -->
+  <div id="loaderOverlay" class="fixed inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center hidden">
+    <div class="text-center animate-pulse">
+      <img src="{{ url_for('static', filename='imagenes/logoudec.png') }}" alt="Cargando" class="w-24 mx-auto mb-4">
+      <p class="text-gray-700 text-xl font-semibold">Cargando...</p>
+    </div>
+  </div>
+
   <div class="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
     
     <!-- Sección izquierda -->
@@ -27,7 +36,7 @@
       </div>
       <p class="text-center text-gray-500">Ingrese sus credenciales para continuar 🧐</p>
 
-      <form action="/login" method="POST" class="mt-6 space-y-4">
+      <form id="loginForm" action="/login" method="POST" class="mt-6 space-y-4" onsubmit="showLoader()">
         <input 
           type="text" 
           name="username" 
@@ -71,6 +80,17 @@
   </div>
 
   <script>
+    // Mostrar el loader cuando el formulario se envíe
+    function showLoader() {
+      document.getElementById('loaderOverlay').classList.remove('hidden');
+    }
+
+    // Función para ocultar el loader cuando la página se haya cargado completamente
+    window.onload = function() {
+      document.getElementById('loaderOverlay').classList.add('hidden');
+    }
+
+    // Función para mostrar/ocultar la contraseña
     function togglePassword() {
       const password = document.getElementById("password");
       const icon = document.getElementById("eyeIcon");
@@ -100,6 +120,5 @@
     }
   </script>
 
-</body>
 </body>
 </html>

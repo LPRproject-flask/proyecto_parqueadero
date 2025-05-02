@@ -8,6 +8,13 @@
 </head>
 <body class="flex bg-gray-100 min-h-screen">
 
+  <div id="loaderOverlay" class="fixed inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center hidden">
+    <div class="text-center animate-pulse">
+      <img src="{{ url_for('static', filename='imagenes/logoudec.png') }}" alt="Cargando" class="w-24 mx-auto mb-4">
+      <p class="text-gray-700 text-xl font-semibold">Cargando...</p>
+    </div>
+  </div>
+
   <!-- Sidebar -->
   <aside class="w-64 bg-white shadow-lg flex flex-col p-6 space-y-4 items-center">
     <img src="{{ url_for('static', filename='imagenes/logoudec.png') }}" alt="Logo Universidad" class="w-50"/>
@@ -63,100 +70,145 @@
   </main>
 
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("openCamera").addEventListener("click", function () {
-      document.getElementById("camera_container").classList.remove("hidden");
-      document.getElementById("closeCamera").classList.remove("hidden");
-      document.getElementById("openCamera").classList.add("hidden");
-    });
-
-    document.getElementById("closeCamera").addEventListener("click", function () {
-      document.getElementById("camera_container").classList.add("hidden");
-      document.getElementById("closeCamera").classList.add("hidden");
-      document.getElementById("openCamera").classList.remove("hidden");
-    });
-
-    document.getElementById("capturePlate").addEventListener("click", function () {
-      fetch("/capture_image", {
-        method: "POST"
-      })
-      .then(response => response.json())
-      .then(data => {
-        const plateText = data.plate_text;
-        document.getElementById("plateNumber").value = plateText;
-        document.getElementById("plateValidation").classList.remove("hidden");
-      })
-      .catch(error => {
-        console.error("Error al procesar la placa:", error);
+    function showLoader() {
+      document.getElementById('loaderOverlay').classList.remove('hidden');
+    }
+  
+    function hideLoader() {
+      document.getElementById('loaderOverlay').classList.add('hidden');
+    }
+  
+    // Mostrar loader al iniciar la carga del DOM
+    window.addEventListener("DOMContentLoaded", function () {
+      showLoader();
+  
+      // Ocultar loader cuando toda la página y recursos estén completamente cargados
+      window.addEventListener("load", function () {
+        setTimeout(hideLoader, 500); // Suaviza el cierre del loader
       });
-    });
-
-    document.getElementById("checkDatabase").addEventListener("click", function () {
-      const plate = document.getElementById("plateNumber").value.trim();
-      if (!plate) return;
-
-      fetch("/check_plate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plates: plate })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.registered) {
-
-          document.getElementById("nombre").textContent = data.owner_name;
-          document.getElementById("placa").textContent = data.plate_number;
-          document.getElementById("cedula").textContent = data.owner_id;
-          document.getElementById("foto").src = `/static/uploads/${data.photo}`;
-          document.getElementById("email").textContent = data.email;
-          document.getElementById("bienvenida").textContent = data.owner_name;
-
-          document.getElementById("plateInfoCard").classList.remove("hidden");
-
-        } else {
-          alert("❌ Placa no encontrada en la base de datos.");
-          document.getElementById("plateInfoCard").classList.add("hidden");
-        }
-      })
-      .catch(error => {
-        console.error("Error al verificar la placa:", error);
-      });
-    });
-
-    document.getElementById("verifyManualPlate").addEventListener("click", function () {
-      const plate = document.getElementById("manualPlateInput").value.trim();
-
-      if (!plate) {
-        document.getElementById("manualCheckResult").textContent = "⚠️ Por favor ingrese una placa.";
-        return;
+  
+      // Mostrar loader al hacer clic en botones adicionales
+      const registerButton = document.getElementById("registerPlate");
+      if (registerButton) {
+        registerButton.addEventListener("click", function () {
+          showLoader();
+        });
       }
-
-      fetch("/check_plate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plates: plate })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.registered) {
-          document.getElementById("manualCheckResult").textContent = "✅ Placa registrada: " + data.owner_name;
-
-          document.getElementById("nombre").textContent = data.owner_name;
-          document.getElementById("placa").textContent = data.plate_number;
-          document.getElementById("cedula").textContent = data.owner_id;
-          document.getElementById("foto").src = `/static/uploads/${data.photo}`;
-          
-          document.getElementById("plateInfoCard").classList.remove("hidden");
-        } else {
-          document.getElementById("manualCheckResult").textContent = "❌ Placa no encontrada en la base de datos.";
-        }
-      })
-      .catch(error => {
-        console.error("Error al verificar la placa:", error);
-        document.getElementById("manualCheckResult").textContent = "❌ Error al verificar la placa.";
+  
+      const logoutButton = document.getElementById("logoutButton");
+      if (logoutButton) {
+        logoutButton.addEventListener("click", function () {
+          showLoader();
+        });
+      }
+  
+      const capture = document.getElementById("capturePlate");
+      const check = document.getElementById("checkDatabase");
+      const verifyManual = document.getElementById("verifyManualPlate");
+  
+      document.getElementById("openCamera").addEventListener("click", function () {
+        document.getElementById("camera_container").classList.remove("hidden");
+        document.getElementById("closeCamera").classList.remove("hidden");
+        document.getElementById("openCamera").classList.add("hidden");
       });
+  
+      document.getElementById("closeCamera").addEventListener("click", function () {
+        document.getElementById("camera_container").classList.add("hidden");
+        document.getElementById("closeCamera").classList.add("hidden");
+        document.getElementById("openCamera").classList.remove("hidden");
+      });
+  
+      if (capture) {
+        capture.addEventListener("click", () => {
+          showLoader();
+          fetch("/capture_image", {
+            method: "POST"
+          })
+          .then(response => response.json())
+          .then(data => {
+            const plateText = data.plate_text;
+            document.getElementById("plateNumber").value = plateText;
+            document.getElementById("plateValidation").classList.remove("hidden");
+          })
+          .catch(error => console.error("Error al procesar la placa:", error))
+          .finally(hideLoader);
+        });
+      }
+  
+      if (check) {
+        check.addEventListener("click", () => {
+          showLoader();
+          const plate = document.getElementById("plateNumber").value.trim();
+          if (!plate) return hideLoader();
+  
+          fetch("/check_plate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ plates: plate })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.registered) {
+              showLoader();
+              document.getElementById("nombre").textContent = data.owner_name;
+              document.getElementById("placa").textContent = data.plate_number;
+              document.getElementById("cedula").textContent = data.owner_id;
+              document.getElementById("foto").src = `/static/uploads/${data.photo}`;
+              document.getElementById("correo").textContent = data.email;
+              document.getElementById("bienvenida").textContent = data.owner_name;
+              document.getElementById("plateInfoCard").classList.remove("hidden");
+            } else {
+              showLoader();
+              alert("❌ Placa no encontrada en la base de datos.");
+              document.getElementById("plateInfoCard").classList.add("hidden");
+            }
+          })
+          .catch(error => {
+            showLoader();
+            console.error("Error al verificar la placa:", error);
+          })
+          .finally(hideLoader);
+        });
+      }
+  
+      if (verifyManual) {
+        verifyManual.addEventListener("click", () => {
+          showLoader();
+          const plate = document.getElementById("manualPlateInput").value.trim();
+          if (!plate) {
+            document.getElementById("manualCheckResult").textContent = "⚠️ Por favor ingrese una placa.";
+            return hideLoader();
+          }
+  
+          fetch("/check_plate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ plates: plate })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.registered) {
+              showLoader();
+              document.getElementById("manualCheckResult").textContent = "✅ Placa registrada: " + data.owner_name;
+              document.getElementById("nombre").textContent = data.owner_name;
+              document.getElementById("placa").textContent = data.plate_number;
+              document.getElementById("cedula").textContent = data.owner_id;
+              document.getElementById("foto").src = `/static/uploads/${data.photo}`;
+              document.getElementById("plateInfoCard").classList.remove("hidden");
+            } else {
+              showLoader();
+              document.getElementById("manualCheckResult").textContent = "❌ Placa no encontrada en la base de datos.";
+            }
+          })
+          .catch(error => {
+            showLoader();
+            console.error("Error al verificar la placa:", error);
+            document.getElementById("manualCheckResult").textContent = "❌ Error al verificar la placa.";
+          })
+          .finally(hideLoader);
+        });
+      }
     });
-  });
-</script>
+  </script>  
 </body>
 </html>
