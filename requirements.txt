@@ -13,3 +13,4 @@ torch
 torchvision
 protobuf
 tiktoken
+psycopg2-binary
