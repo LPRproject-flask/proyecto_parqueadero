@@ -36,22 +36,17 @@ mail = Mail(app)
 
 ##app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 
-if os.environ.get('RENDER'):
-  
-  db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://adminudec:YDySMJyI64fWllahlhvwCnNpNbDivKlM@dpg-d0aeui2dbo4c73cdsgn0-a.oregon-postgres.render.com/parqueadero_udec'
 
-else:
 
-  base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-  instance_path = os.path.join(os.path.expanduser("~"), "AppData", "Local", "ReconocimientoPlacas")
-  if not os.path.exists(instance_path):
-      os.makedirs(instance_path)
-  db_path = os.path.join(instance_path, 'data.db') 
-
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(instance_path, 'data.db')}"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://adminudec:YDySMJyI64fWllahlhvwCnNpNbDivKlM@dpg-d0aeui2dbo4c73cdsgn0-a.oregon-postgres.render.com/parqueadero_udec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)  # 🔥 conectar db con la app.py
+
+###with app.app_context():
+   ## db.create_all()
+    ##print("✅ Tablas creadas correctamente en PostgreSQL.")
 
 # Ruta del modelo TrOCR
 ##local_model_path = "C:\\Users\\kmilo\\Desktop\\proyecto_parqueadero\\trocr_model"
