@@ -101,14 +101,27 @@ if not cap.isOpened():
 
 print("🎥 Cámara en vivo iniciada. Presiona 'q' para salir.")
 
+frame_count = 0
+process_interval = 10 ##procesa cada 10 frames
+
 while True:
+    
     ret, frame = cap.read()
     if not ret:
         print("❌ Error: No se pudo capturar el frame de la cámara.")
         break
-    
-    processed_frame = plate_recognition.process_frame(frame)
+
+    if frame_count % process_interval == 0:
+      print(f"🧠 Procesando frame {frame_count} con YOLO + TrOCR...")
+      processed_frame = plate_recognition.process_frame(frame)
+      
+    else:
+        print(f"🎞️ Mostrando frame {frame_count} sin procesamiento.")
+        processed_frame = frame
+
     cv2.imshow("Detección en Vivo", processed_frame)
+    frame_count += 1
+    
 
     if cv2.waitKey(1) & 0xFF == ord('q'):  # Presiona 'q' para salir
         break
