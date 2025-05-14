@@ -13,7 +13,7 @@ from flask import Flask, redirect, url_for, session
 import secrets
 from models import Plate
 from flask_sqlalchemy import SQLAlchemy
-from models import db, Plate  
+from models import db, Plate, User
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 import base64
@@ -146,12 +146,13 @@ def generate_frames():
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-# Conectar a la base de datos
-def get_db():
-    conn = sqlite3.connect('db/data.db')
-    conn.row_factory = sqlite3.Row  # Para acceder a las columnas como atributos
-    return conn
+#__________________________________________________________________________________
+# Conectar a la base de datos, YA NO SE USA PQ SE MIGRO A POSTGRESS
+#def get_db():
+#    conn = sqlite3.connect('db/data.db')
+#    conn.row_factory = sqlite3.Row  # Para acceder a las columnas como atributos
+#    return conn
+#__________________________________________________________________________________
 
 # Ruta para la página de inicio de sesión
 @app.route('/')
@@ -165,19 +166,12 @@ def login_user():
         username = request.form['username']
         password = request.form['password']
 
-        conn = get_db()
-        cursor = conn.cursor()
+        user = User.query.filter_by(username=username).firts()
 
-        cursor.execute("SELECT password FROM users WHERE username = ?", (username,))
-        user = cursor.fetchone()
-        conn.close()
-
-        if user:
-            stored_password = user['password']
-            if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
-                return redirect(url_for('dashboard'))  
-            else:
-                return "Contraseña incorrecta", 400
+        if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            return redirect(url_for('dashboard'))  
+        elif user:
+            return "Contraseña incorrecta", 400
         else:
             return "Usuario no encontrado", 400
 
@@ -204,16 +198,17 @@ def register_user():
 
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        conn = get_db()
-        cursor = conn.cursor()
-        try:
-            cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                           (username, email, hashed_password))
-            conn.commit()
-        except sqlite3.IntegrityError:
-            conn.close()
-            return "El usuario ya existe", 400
-        conn.close()
+        existing_user = User.query.filter(
+            (User.username == username) | (User.email == email)
+        ).first()
+
+        if existing_user:
+            return "El usuario o correo ya existe", 400
+        
+        new_user = User(username=username, email=email, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        
         return redirect(url_for('login_user'))
     
     return render_template('register_user.html')
@@ -235,26 +230,32 @@ def register_plate():
         cedula = request.form.get('cedula')
         foto = request.files.get('foto')
 
-        if not nombre or not placa or not cedula or not foto:
+        if not nombre or not placa or not cedula:
             return jsonify({"success": False, "error": "Todos los campos son obligatorios"}), 400
         
         # Guardar la imagen en la carpeta de uploads
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], foto.filename)
         foto.save(image_path)
 
-        # Guardar en la base de datos
-        conn = sqlite3.connect('db/data.db')
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO plates (nombre, placa, cedula, foto)
-            VALUES (?, ?, ?, ?)
-        """, (nombre, placa, cedula, foto.filename))
-        conn.commit()
-        conn.close()
+        existing_plate = Plate.query.filter_by(plate_number=placa).first()
+        if existing_plate:
+            return jsonify({"success": False, "error": "Laplaca ya esta registrada"}), 400
+        
+        nueva_placa = Plate(
+            owner_name=nombre,
+            plate_number=placa,
+            owner_id=cedula,
+            foto=foto.filename
+        )
+
+        db.session.add(nueva_placa)
+        db.session.commit()
+
 
         return jsonify({"success": True, "message": "Placa registrada con éxito"})
 
     except Exception as e:
+        db.session.rollback() #--> en caaso de error revierte los cambios
         return jsonify({"success": False, "error": str(e)}), 500
 
 # Ruta para mostrar el formulario de registro de placa
@@ -280,27 +281,21 @@ def check_plate():
 
     cleaned_plate = plate.strip().upper()
 
-    conn = sqlite3.connect('db/data.db')
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT nombre, placa, cedula, foto, email 
-        FROM plates 
-        WHERE placa = ?
-    """, (cleaned_plate,))
-    result = cursor.fetchone()
-    conn.close()
+    plate_record = Plate.query.filter_by(plate_number=cleaned_plate).first()
 
-    if result:
-        nombre, placa, cedula, foto, email = result
+    if plate_record:
 
         return jsonify({
+
             'registered': True,
-            'owner_name': nombre,
-            'plate_number': placa,
-            'owner_id': cedula,
-            'photo': foto,
-            'email': email
+            'owner_name': plate_record.nombre,
+            'plate_number': plate_record.placa,
+            'owner_id': plate_record.cedula,
+            'photo': plate_record.foto,
+            'email': plate_record.email
+            
         })
+
     else:
         return jsonify({'registered': False})
 
@@ -310,11 +305,7 @@ def forgot_password():
     if request.method == 'POST':
         email = request.form['email']
 
-        conn = sqlite3.connect('db/data.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
-        user = cursor.fetchone()
-        conn.close()
+        user = User.query.filter_by(email=email).first()
 
         if user:
             token = s.dumps(email, salt='recuperar-contrasena')
@@ -335,23 +326,25 @@ def forgot_password():
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
-        email = s.loads(token, salt='recuperar-contrasena', max_age=600)  # 600 segundos = 10 minutos
+        email = s.loads(token, salt='recuperar-contrasena', max_age=600)  # 600 SEGUNDOS ES 10 MINUTOS
     except Exception:
         return "El enlace ha expirado o no es válido", 400
 
     if request.method == 'POST':
         nueva_contra = request.form['password']
-
         # Hasheamos la contraseña antes de guardarla
         hashed_password = bcrypt.hashpw(nueva_contra.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        conn = sqlite3.connect('db/data.db')
-        cursor = conn.cursor()
-        cursor.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password, email))
-        conn.commit()
-        conn.close()
+        user = User.query.filter_by(email=email).first()
 
-        return redirect(url_for('login_page'))
+        if user:
+            user.password = hashed_password
+            db.session.commit()
+            return redirect(url_for('login_page'))
+        
+        else:
+
+            return "Usuario no encontrado", 400
 
     return render_template('nueva_contrasena.html') 
 
