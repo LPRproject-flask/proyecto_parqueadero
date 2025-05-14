@@ -18,9 +18,9 @@ cursor.execute('''
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS plates (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        owner_name TEXT NOT NULL,
-        plate_number TEXT NOT NULL UNIQUE,
-        owner_id TEXT NOT NULL
+        nombre TEXT NOT NULL,
+        placa TEXT NOT NULL UNIQUE,
+        cedula TEXT NOT NULL
     )
 ''')
 
