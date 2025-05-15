@@ -166,7 +166,7 @@ def login_user():
         username = request.form['username']
         password = request.form['password']
 
-        user = User.query.filter_by(username=username).firts()
+        user = User.query.filter_by(username=username).first()
 
         if user and bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
             return redirect(url_for('dashboard'))  
@@ -226,25 +226,25 @@ if not os.path.exists(UPLOAD_FOLDER):
 def register_plate():
     try:
         nombre = request.form.get('nombre')
-        placa = request.form.get('placa')
+        placa = request.form.get('placa').strip().upper()
         cedula = request.form.get('cedula')
         foto = request.files.get('foto')
 
-        if not nombre or not placa or not cedula:
+        if not nombre or not placa or not cedula or not foto:
             return jsonify({"success": False, "error": "Todos los campos son obligatorios"}), 400
         
         # Guardar la imagen en la carpeta de uploads
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], foto.filename)
         foto.save(image_path)
 
-        existing_plate = Plate.query.filter_by(plate_number=placa).first()
+        existing_plate = Plate.query.filter_by(placa=placa).first()
         if existing_plate:
-            return jsonify({"success": False, "error": "Laplaca ya esta registrada"}), 400
+            return jsonify({"success": False, "error": "La placa ya esta registrada"}), 400
         
         nueva_placa = Plate(
-            owner_name=nombre,
-            plate_number=placa,
-            owner_id=cedula,
+            nombre=nombre,
+            placa=placa,
+            cedula=cedula,
             foto=foto.filename
         )
 
@@ -256,6 +256,7 @@ def register_plate():
 
     except Exception as e:
         db.session.rollback() #--> en caaso de error revierte los cambios
+        print(f"Error en /register_plate: {e}") 
         return jsonify({"success": False, "error": str(e)}), 500
 
 # Ruta para mostrar el formulario de registro de placa
@@ -281,7 +282,7 @@ def check_plate():
 
     cleaned_plate = plate.strip().upper()
 
-    plate_record = Plate.query.filter_by(plate_number=cleaned_plate).first()
+    plate_record = Plate.query.filter_by(placa=cleaned_plate).first()
 
     if plate_record:
 
@@ -343,7 +344,6 @@ def reset_password(token):
             return redirect(url_for('login_page'))
         
         else:
-
             return "Usuario no encontrado", 400
 
     return render_template('nueva_contrasena.html') 
