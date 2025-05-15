@@ -301,25 +301,36 @@ def check_plate():
         return jsonify({'registered': False})
 
 # Ruta para solicitar recuperación    
+
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        email = request.form['email']
+        try:
+            email = request.form['email']
 
-        user = User.query.filter_by(email=email).first()
+            user = User.query.filter_by(email=email).first()
 
-        if user:
-            token = s.dumps(email, salt='recuperar-contrasena')
-            link = url_for('reset_password', token=token, _external=True)
+            if user:
+                token = s.dumps(email, salt='recuperar-contrasena')
+                link = url_for('reset_password', token=token, _external=True)
 
-            msg = Message("Restablece tu contraseña",
-                          sender=app.config['MAIL_USERNAME'],
-                          recipients=[email])
-            msg.body = f"Hola! Haz clic en este enlace para restablecer tu contraseña: {link}\n\nEste enlace expirará en 10 minutos."
-            mail.send(msg)
+                msg = Message("Restablece tu contraseña",
+                              sender=app.config['MAIL_USERNAME'],
+                              recipients=[email])
+                msg.body = f"Hola! Haz clic en este enlace para restablecer tu contraseña: {link}\n\nEste enlace expirará en 10 minutos."
+                mail.send(msg)
 
-        return render_template('mensaje_confirmacion.html')  # Muestra mensaje genérico
-    return render_template('forgot_password.html')  # Tu plantilla HTML actual
+            # Devolver respuesta JSON para el frontend
+            
+            return jsonify({"success": True})
+
+        except Exception as e:
+            print(f"❌ Error en recuperación: {e}")
+            return jsonify({"success": False, "error": str(e)}), 500
+        
+
+    # Si es GET, renderizar el formulario
+    return render_template('forgot_password.html')
 
     
 # Ruta para restablecer contraseña
