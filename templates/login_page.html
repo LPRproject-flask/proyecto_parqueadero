@@ -23,7 +23,7 @@
     <div class="md:w-1/2 bg-teal-600 text-white flex flex-col justify-center items-center p-10 space-y-4">
       <h2 class="text-4xl font-bold">¡Hola!</h2>
       <p class="text-center">¿Aún no tienes una cuenta? Regístrate y empieza a usar nuestro sistema. 😎</p>
-      <a href="{{ url_for('register_user') }}" class="mt-2 bg-white text-teal-600 font-bold py-2 px-6 rounded-lg hover:bg-gray-100 transition duration-200">
+      <a href="{{ url_for('register_user') }}" class="mt-2 bg-white text-teal-600 font-bold py-2 px-6 rounded-lg hover:bg-gray-100 transition duration-200" onclick="showLoader()">
         Registrarse ahora
       </a>
     </div>
@@ -74,7 +74,7 @@
       </form>
 
       <div class="text-center mt-4">
-        <a href="{{ url_for('forgot_password') }}" class="text-teal-500 hover:underline">¿Olvidaste tu contraseña? 🤔</a>
+        <a href="{{ url_for('forgot_password') }}" class="text-teal-500 hover:underline" onclick="showLoader()">¿Olvidaste tu contraseña? 🤔</a>
       </div>
     </div>
   </div>
@@ -87,8 +87,21 @@
 
     // Función para ocultar el loader cuando la página se haya cargado completamente
     window.onload = function() {
+
+    setTimeout(()=> {
       document.getElementById('loaderOverlay').classList.add('hidden');
+     }, 3000); 
     }
+
+    // Ocultar loader al volver con la flecha atrás
+    window.addEventListener('pageshow', function () {
+    document.getElementById('loaderOverlay').classList.add('hidden');
+    });
+
+    // Ocultar loader si el usuario recarga o cierra la página
+    window.addEventListener('beforeunload', function () {
+    document.getElementById('loaderOverlay').classList.add('hidden');
+    });
 
     // Función para mostrar/ocultar la contraseña
     function togglePassword() {
@@ -118,6 +131,8 @@
                    -4.477 0-8.268-2.943-9.542-7z" />`;
       }
     }
+
+
   </script>
 
 </body>

@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Registro de Usuario</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gradient-to-r from-cyan-100 via-white to-cyan-100">
 
+  {% include "components/loader.html" %}
+  
   <div class="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
     
     <!-- Sección izquierda -->
     <div class="md:w-1/2 bg-teal-600 text-white flex flex-col justify-center items-center p-10 space-y-4">
       <h2 class="text-3xl font-bold">¡Bienvenido! 😄</h2>
       <p class="text-center">Crea una cuenta para acceder a todas las funciones. 🚀</p>
-      <button onclick="window.location.href='{{ url_for('login_page') }}'" 
+      <button data-show-loader onclick="window.location.href='{{ url_for('login_page') }}'" 
               class="bg-white text-teal-600 font-bold py-2 px-6 rounded-lg hover:bg-gray-100 transition duration-200">
         ¿Ya tienes cuenta? Inicia sesión
       </button>
@@ -72,7 +75,7 @@
           </button>
         </div>
 
-        <button type="submit" 
+        <button type="submit" data-show-loader 
                 class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl transition duration-300">
           Registrarse
         </button>
