@@ -5,17 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Iniciar Sesión</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
 </head>
 
 <body class="min-h-screen flex items-center justify-center bg-gradient-to-r from-cyan-100 via-white to-cyan-100">
 
-  <!-- Loader -->
-  <div id="loaderOverlay" class="fixed inset-0 z-50 bg-white bg-opacity-80 flex items-center justify-center hidden">
-    <div class="text-center animate-pulse">
-      <img src="{{ url_for('static', filename='imagenes/logoudec.png') }}" alt="Cargando" class="w-24 mx-auto mb-4">
-      <p class="text-gray-700 text-xl font-semibold">Cargando...</p>
-    </div>
-  </div>
+  {% include "components/loader.html" %}
+
 
   <div class="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
     
@@ -30,13 +26,13 @@
 
     <!-- Sección derecha -->
     <div class="md:w-1/2 p-10">
-      <h2 class="text-2xl font-bold text-center text-gray-700">Iniciar sesión</h2>
+      <h2 class="text-2xl font-bold text-center text-gray-700" onclick=data-show-loader>Iniciar sesión</h2>
       <div class="flex justify-center my-4">
         <img src="{{ url_for('static', filename='imagenes/logoudec.png') }}" alt="Logo Universidad" class="w-60 h-auto">
       </div>
       <p class="text-center text-gray-500">Ingrese sus credenciales para continuar 🧐</p>
 
-      <form id="loginForm" action="/login" method="POST" class="mt-6 space-y-4" onsubmit="showLoader()">
+      <form id="loginForm" action="/login" method="POST" class="mt-6 space-y-4" onsubmit=data-show-loader>
         <input 
           type="text" 
           name="username" 
@@ -66,7 +62,7 @@
           </button>
         </div>
 
-        <button 
+        <button data-show-loader
           type="submit" 
           class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl transition duration-300">
           Iniciar sesión
@@ -80,28 +76,6 @@
   </div>
 
   <script>
-    // Mostrar el loader cuando el formulario se envíe
-    function showLoader() {
-      document.getElementById('loaderOverlay').classList.remove('hidden');
-    }
-
-    // Función para ocultar el loader cuando la página se haya cargado completamente
-    window.onload = function() {
-
-      setTimeout(()=> {
-        document.getElementById('loaderOverlay').classList.add('hidden');
-      }, 3000); 
-    }
-
-    // Ocultar loader al volver con la flecha atrás
-    window.addEventListener('pageshow', function () {
-    document.getElementById('loaderOverlay').classList.add('hidden');
-    });
-
-    // Ocultar loader si el usuario recarga o cierra la página
-    window.addEventListener('beforeunload', function () {
-    document.getElementById('loaderOverlay').classList.add('hidden');
-    });
 
     // Función para mostrar/ocultar la contraseña
     function togglePassword() {

@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Establecer Nueva Contraseña</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='js/loader.js') }}"></script>
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gradient-to-r from-cyan-100 via-white to-cyan-100">
+
+  {% include "components/loader.html" %}
 
   <div class="w-full max-w-md bg-white shadow-xl rounded-xl p-8 space-y-4">
     <h2 class="text-2xl font-bold text-center text-gray-700">Establecer Nueva Contraseña 🔐</h2>
@@ -54,7 +57,7 @@
 
       <p id="errorMsg" class="text-red-500 text-sm text-center hidden">❌ Las contraseñas no coinciden.</p>
 
-      <button 
+      <button data-show-loader
         type="submit" 
         class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 rounded-xl transition duration-300">
         Guardar Contraseña
