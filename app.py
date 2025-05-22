@@ -359,6 +359,12 @@ def reset_password(token):
 
     return render_template('nueva_contrasena.html') 
 
+#MENSAJE DE CONFIRMACION DE ENVIO DE ENLACE PARA RESTABLECER CONTRASEÑA
+@app.route('/mensaje_confirmacion')
+def mensaje_confirmacion():
+    return render_template('mensaje_confirmacion.html')
+
+
 #al dar al boton capturar placa se envia la imagen y la procesa 
 @app.route('/process_plate', methods=['POST'])
 def process_plate():
