@@ -109,7 +109,7 @@
               const base64Image = canvas.toDataURL("image/jpeg");
 
               // Enviar la imagen al backend
-              fetch("/detect_plate_live", {
+              fetch("/process_plate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ image: base64Image })
