@@ -35,8 +35,6 @@ app.config['MAIL_USERNAME'] = 'poryectolpr@gmail.com'
 app.config['MAIL_PASSWORD'] = 'jaau enfj rnij fhrj' 
 mail = Mail(app)
 
-##app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://adminudec:YDySMJyI64fWllahlhvwCnNpNbDivKlM@dpg-d0aeui2dbo4c73cdsgn0-a.oregon-postgres.render.com/parqueadero_udec'
 
 
@@ -45,12 +43,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)  # 🔥 conectar db con la app.py
 
-###with app.app_context():
-   ## db.create_all()
-    ##print("✅ Tablas creadas correctamente en PostgreSQL.")
-
-# Ruta del modelo TrOCR
-##local_model_path = "C:\\Users\\kmilo\\Desktop\\proyecto_parqueadero\\trocr_model"
 local_model_path = "trocr_model"
 
 # Clase para extracción de texto con TrOCR
@@ -59,8 +51,6 @@ class TextExtraction:
         model_name = "microsoft/trocr-base-stage1"
         self.processor = TrOCRProcessor.from_pretrained(model_name)
         self.model = VisionEncoderDecoderModel.from_pretrained(model_name)
-        #self.processor = TrOCRProcessor.from_pretrained(local_model_path)
-        #self.model = VisionEncoderDecoderModel.from_pretrained(local_model_path)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model.to(self.device)
 
@@ -82,8 +72,7 @@ class TextExtraction:
 class PlateRecognition:
     def __init__(self):
         print("📌 Cargando modelo YOLO...")
-        ##self.model = YOLO("C:\\Users\\kmilo\\Desktop\\proyecto_parqueadero\\runs\\detect\\train\\weights\\best.pt")
-
+        
         base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
         model_path = os.path.join(base_path, 'model_weights', 'best.pt')
         self.model = YOLO(model_path)
@@ -147,13 +136,6 @@ def generate_frames():
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-#__________________________________________________________________________________
-# Conectar a la base de datos, YA NO SE USA PQ SE MIGRO A POSTGRESS
-#def get_db():
-#    conn = sqlite3.connect('db/data.db')
-#    conn.row_factory = sqlite3.Row  # Para acceder a las columnas como atributos
-#    return conn
-#__________________________________________________________________________________
 
 # Ruta para la página de inicio de sesión
 @app.route('/')
