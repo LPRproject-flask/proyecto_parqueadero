@@ -20,6 +20,7 @@ import base64
 import io
 from PIL import Image
 import sys
+from reconocimiento_placas import PlateRecognition
 
 app = Flask(__name__)
 
