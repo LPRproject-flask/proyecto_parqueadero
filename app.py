@@ -212,8 +212,9 @@ def register_plate():
         placa = request.form.get('placa').strip().upper()
         cedula = request.form.get('cedula')
         foto = request.files.get('foto')
+        email = request.form.get('email')
 
-        if not nombre or not placa or not cedula or not foto:
+        if not nombre or not placa or not cedula or not foto or not email:
             return jsonify({"success": False, "error": "Todos los campos son obligatorios"}), 400
         
         # Guardar la imagen en la carpeta de uploads
@@ -228,6 +229,7 @@ def register_plate():
             nombre=nombre,
             placa=placa,
             cedula=cedula,
+            email=email,
             foto=foto.filename
         )
 
